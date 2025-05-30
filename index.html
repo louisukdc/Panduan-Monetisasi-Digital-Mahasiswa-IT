@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panduan Monetisasi Keahlian Digital Mahasiswa Informatika</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Visualization & Content Choices:
+        - Pendahuluan/Ringkasan: Teks statis (Goal: Inform). HTML/Tailwind.
+        - Keterampilan Kunci: Kartu interaktif (expand/collapse) dengan ikon Unicode (Goal: Organize, Inform). HTML/Tailwind + JS.
+        - Ide Penghasilan: Kartu interaktif dengan ikon Unicode (Goal: Compare, Inform). HTML/Tailwind + JS.
+        - Platform & Media Sosial:
+            - Komisi Platform: Bar chart (Goal: Compare, Inform). Chart.js Canvas.
+            - Strategi Medsos: Teks & ikon (Goal: Inform). HTML/Tailwind.
+        - Tips Mahasiswa: Daftar poin dengan ikon (Goal: Inform). HTML/Tailwind.
+        - Inspirasi: Teks & kutipan (Goal: Motivate). HTML/Tailwind.
+        - Rekomendasi: Daftar poin (Goal: Summarize). HTML/Tailwind.
+        - Generator Ide Monetisasi: Input teks, tombol, area output untuk ide yang dihasilkan LLM (Goal: Generate personalized ideas). HTML/Tailwind + JS + Gemini API.
+        Semua konten berasal langsung dari laporan. Pilihan ini dibuat untuk menyajikan informasi dengan cara yang terstruktur, interaktif, dan visual menarik tanpa bergantung pada SVG/Mermaid, memastikan aksesibilitas dan kemudahan penggunaan. -->
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .nav-link { transition: all 0.3s ease; }
+        .nav-link.active {
+            background-color: #0284c7; /* sky-600 */
+            color: white;
+            font-weight: 600;
+        }
+        .content-section { display: none; }
+        .content-section.active { display: block; }
+        .card {
+            background-color: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .details {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out;
+        }
+        .details.open {
+            max-height: 2000px; /* Adjust as needed */
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 450px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        .accordion-button::after {
+            content: '\\25BC'; /* Down arrow */
+            float: right;
+            transition: transform 0.3s ease;
+        }
+        .accordion-button.open::after {
+            transform: rotate(180deg); /* Up arrow */
+        }
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            vertical-align: middle;
+            margin-left: 8px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <header class="bg-sky-700 text-white p-4 shadow-md sticky top-0 z-50">
+        <div class="container mx-auto flex flex-col sm:flex-row justify-between items-center">
+            <h1 class="text-xl sm:text-2xl font-bold">Panduan Monetisasi Digital Mahasiswa IT</h1>
+            <nav class="mt-2 sm:mt-0">
+                <ul class="flex space-x-2 sm:space-x-3 overflow-x-auto pb-2 sm:pb-0">
+                    <li><button data-target="beranda" class="nav-link active px-3 py-2 rounded-md text-sm">Beranda</button></li>
+                    <li><button data-target="keterampilan" class="nav-link px-3 py-2 rounded-md text-sm">Keterampilan</button></li>
+                    <li><button data-target="ide" class="nav-link px-3 py-2 rounded-md text-sm">Ide Penghasilan</button></li>
+                    <li><button data-target="platform" class="nav-link px-3 py-2 rounded-md text-sm">Platform & Medsos</button></li>
+                    <li><button data-target="tips" class="nav-link px-3 py-2 rounded-md text-sm">Tips</button></li>
+                    <li><button data-target="inspirasi" class="nav-link px-3 py-2 rounded-md text-sm">Inspirasi</button></li>
+                    <li><button data-target="rekomendasi" class="nav-link px-3 py-2 rounded-md text-sm">Rekomendasi</button></li>
+                    <li><button data-target="generator" class="nav-link px-3 py-2 rounded-md text-sm">✨ Generator Ide</button></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-4 sm:p-6 lg:p-8">
+        <p class="mb-6 text-gray-700 bg-sky-100 p-4 rounded-lg shadow">Selamat datang di Panduan Interaktif Monetisasi Keahlian Digital! Aplikasi ini dirancang untuk membantu Anda, mahasiswa informatika, menjelajahi berbagai cara untuk menghasilkan pendapatan dari keterampilan yang telah Anda pelajari. Gunakan navigasi di atas untuk berpindah antar bagian, temukan ide-ide menarik, pahami platform yang ada, dan dapatkan tips praktis. Setiap bagian akan memberikan wawasan berharga dari laporan yang telah disediakan.</p>
+
+        <section id="beranda" class="content-section active">
+            <h2 class="text-2xl font-semibold mb-4 text-sky-700">Selamat Datang di Dunia Peluang Digital!</h2>
+            <div class="space-y-6">
+                <div class="card p-6">
+                    <h3 class="text-xl font-semibold mb-2 text-sky-600">Ringkasan Eksekutif</h3>
+                    <p class="text-gray-700 leading-relaxed">Laporan ini menguraikan strategi yang dapat ditindaklanjuti bagi mahasiswa informatika untuk memanfaatkan keahlian akademis mereka guna menghasilkan pendapatan digital. Laporan ini menekankan <i>freelancing</i>, pembuatan produk digital, dan pengembangan konten sebagai jalur utama, didukung oleh keterampilan teknis dan <i>soft skill</i> esensial. Laporan ini juga menyoroti platform-platform utama, tren pasar, dan menawarkan saran praktis untuk menyeimbangkan studi dengan upaya wirausaha.</p>
+                </div>
+                <div class="card p-6">
+                    <h3 class="text-xl font-semibold mb-2 text-sky-600">Pendahuluan: Keunggulan Digital Anda</h3>
+                    <p class="text-gray-700 leading-relaxed">Sebagai mahasiswa informatika tingkat akhir, Anda memiliki keunggulan unik dalam ekonomi digital yang berkembang pesat. Kurikulum perkuliahan telah membekali Anda dengan keterampilan teknis dasar yang sangat dicari. Aplikasi ini bertujuan menjembatani kesenjangan antara pembelajaran akademis dan perolehan pendapatan praktis, menawarkan peta jalan untuk memonetisasi "keterampilan sederhana" melalui internet dan media sosial, bahkan saat menyelesaikan skripsi. Lanskap digital kaya akan peluang bagi mereka yang mampu beradaptasi, berinovasi, dan berkomunikasi secara efektif.</p>
+                     <p class="mt-3 text-gray-700 leading-relaxed">Jelajahi setiap bagian untuk menemukan bagaimana Anda dapat mengubah pengetahuan teoretis menjadi keuntungan finansial yang nyata.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="keterampilan" class="content-section">
+            <h2 class="text-2xl font-semibold mb-6 text-sky-700">Keterampilan Inti untuk Monetisasi Digital</h2>
+            <p class="mb-6 text-gray-700">Memonetisasi keahlian informatika memerlukan perpaduan antara kecakapan teknis dan <i>soft skill</i>. Kompetensi ini adalah fondasi potensi pendapatan Anda. Klik pada setiap keterampilan untuk melihat detail lebih lanjut.</p>
+            <div class="grid md:grid-cols-2 gap-6">
+                <div class="card p-0">
+                    <button class="accordion-button w-full text-left p-6 bg-sky-600 text-white rounded-t-lg text-xl font-semibold">🖥️ Kompetensi Teknis</button>
+                    <div class="details p-6 space-y-4">
+                        <div>
+                            <h4 class="font-semibold text-lg">Pengembangan Kode dan Perangkat Lunak</h4>
+                            <p class="text-sm text-gray-600">Java, Python, JavaScript untuk web & mobile. Fleksibilitas bahasa ini memperluas jangkauan pasar. Kembangkan software kustom, plugin, atau aplikasi lengkap.</p>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-lg">📊 Data dan Analitik</h4>
+                            <p class="text-sm text-gray-600">Olah big data (Python, R, SQL), visualisasi data. Penting untuk peran Ilmuwan Data. Tawarkan layanan ke bisnis untuk optimasi operasi/pemasaran.</p>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-lg">☁️ Komputasi Awan (Cloud Computing)</h4>
+                            <p class="text-sm text-gray-600">AWS, Azure, Google Cloud untuk manajemen data efisien & infrastruktur terukur. Dicari startup & UMKM.</p>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-lg">🧠 Kecerdasan Buatan (AI) & Pembelajaran Mesin (ML)</h4>
+                            <p class="text-sm text-gray-600">Algoritma AI untuk otomatisasi & personalisasi. Integrasikan alat AI/ML ke produk/layanan yang ada.</p>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-lg">🛡️ Keamanan Siber (Cybersecurity)</h4>
+                            <p class="text-sm text-gray-600">Lindungi sistem informasi. Tawarkan penilaian kerentanan, tes penetrasi, edukasi phishing. Penting seiring UU PDP.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card p-0">
+                    <button class="accordion-button w-full text-left p-6 bg-teal-600 text-white rounded-t-lg text-xl font-semibold">🤝 Kecakapan Bisnis & Soft Skill</button>
+                    <div class="details p-6 space-y-4">
+                        <div>
+                            <h4 class="font-semibold text-lg">📈 Pemahaman Bisnis yang Mendalam</h4>
+                            <p class="text-sm text-gray-600">Ciptakan solusi teknologi relevan, rancang model bisnis digital inovatif. Jadi "pemecah masalah", bukan hanya "pembuat kode".</p>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-lg">✨ Soft Skill yang Diperlukan</h4>
+                            <ul class="list-disc list-inside text-sm text-gray-600 space-y-1">
+                                <li><strong>Adaptasi & Pembelajaran Berkelanjutan:</strong> Ikuti perkembangan teknologi, kuasai skill baru.</li>
+                                <li><strong>Kreativitas dan Inovasi:</strong> Kembangkan solusi digital unik & efektif.</li>
+                                <li><strong>Kolaborasi & Komunikasi Efektif:</strong> Kerjasama tim, artikulasi ide kompleks.</li>
+                                <li><strong>Pemecahan Masalah:</strong> Hadapi tantangan dengan logis & kreatif.</li>
+                            </ul>
+                            <p class="text-sm text-gray-600 mt-2">Keberhasilan jangka panjang lebih tentang menjadi profesional yang mampu belajar & berinteraksi efektif.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="ide" class="content-section">
+            <h2 class="text-2xl font-semibold mb-6 text-sky-700">Jalur Menuju Pendapatan Digital: Ide & Strategi</h2>
+            <p class="mb-6 text-gray-700">Keterampilan informatika Anda membuka banyak pintu menuju pendapatan digital. Berikut adalah beberapa jalur yang paling memungkinkan, masing-masing dengan potensi dan tantangannya sendiri. Klik pada setiap kategori untuk detail.</p>
+            <div class="space-y-6">
+                <div class="card p-0">
+                    <button class="accordion-button w-full text-left p-6 bg-sky-600 text-white rounded-t-lg text-xl font-semibold">💼 Freelancing: Peluang Langsung</button>
+                    <div class="details p-6 grid md:grid-cols-2 gap-4">
+                        <div><h4 class="font-semibold">🌐 Pengembangan Web & Aplikasi Seluler</h4><p class="text-sm text-gray-600">Buat situs kustom, aplikasi mobile. Spesialisasi (Next.js, Laravel) bisa jadi nilai tambah.</p></div>
+                        <div><h4 class="font-semibold">🛒 Spesialis Pemasaran Digital (Teknis)</h4><p class="text-sm text-gray-600">SEO, analitik data kampanye, otomatisasi. Strategi berbasis data.</p></div>
+                        <div><h4 class="font-semibold">🎨 Desain Grafis & UI/UX (Implementasi Teknis)</h4><p class="text-sm text-gray-600">Template desain, font, ikon, kit UI/UX. Fokus pada implementasi teknis dan prototipe interaktif.</p></div>
+                        <div><h4 class="font-semibold">🧑‍💻 Asisten Virtual & Entri Data</h4><p class="text-sm text-gray-600">Manajemen email, jadwal, pemrosesan data. Tingkatkan dengan otomatisasi.</p></div>
+                    </div>
+                </div>
+                <div class="card p-0">
+                    <button class="accordion-button w-full text-left p-6 bg-teal-600 text-white rounded-t-lg text-xl font-semibold">💡 Membuat & Menjual Produk Digital</button>
+                    <div class="details p-6 grid md:grid-cols-2 gap-4">
+                        <div><h4 class="font-semibold">📚 E-book & Kursus Daring</h4><p class="text-sm text-gray-600">Bagikan pengetahuan (pemrograman, IT). Perkuat pemahaman & bangun merek pribadi.</p></div>
+                        <div><h4 class="font-semibold">🖼️ Template Desain & Aset Digital</h4><p class="text-sm text-gray-600">Template presentasi, medsos, UI kit. Penuhi kebutuhan pasar akan solusi cepat.</p></div>
+                        <div><h4 class="font-semibold">📱 Aplikasi Seluler, Software, & Plugin</h4><p class="text-sm text-gray-600">Aplikasi produktivitas, game, plugin WordPress/Chrome. Atasi masalah spesifik pengguna.</p></div>
+                        <div><h4 class="font-semibold">☁️ Software-as-a-Service (SaaS)</h4><p class="text-sm text-gray-600">Software berbasis langganan. Potensi pendapatan berulang yang stabil.</p></div>
+                        <div><h4 class="font-semibold">📸 Foto & Video Stok</h4><p class="text-sm text-gray-600">Jual di Shutterstock, Adobe Stock. Pendapatan pasif dari aset kreatif.</p></div>
+                    </div>
+                </div>
+                <div class="card p-0">
+                    <button class="accordion-button w-full text-left p-6 bg-indigo-600 text-white rounded-t-lg text-xl font-semibold">🎬 Menjadi Kreator Konten Digital</button>
+                    <div class="details p-6 grid md:grid-cols-2 gap-4">
+                        <div><h4 class="font-semibold">📺 YouTuber & Blogger Profesional</h4><p class="text-sm text-gray-600">Tutorial pemrograman, ulasan teknologi. Monetisasi via iklan, sponsor, afiliasi.</p></div>
+                        <div><h4 class="font-semibold">🤳 Influencer Media Sosial (Niche Teknologi)</h4><p class="text-sm text-gray-600">Fokus di Instagram/TikTok (tips coding, ulasan gadget). Tarik sponsor merek teknologi.</p></div>
+                        <div><h4 class="font-semibold">🎮 Streamer (Gaming atau Edukasi Teknologi)</h4><p class="text-sm text-gray-600">Streaming di Twitch/YouTube (game, live coding). Pendapatan dari donasi, langganan.</p></div>
+                    </div>
+                </div>
+                 <div class="card p-0">
+                    <button class="accordion-button w-full text-left p-6 bg-purple-600 text-white rounded-t-lg text-xl font-semibold">🔗 Jalur Lain yang Potensial</button>
+                    <div class="details p-6 grid md:grid-cols-2 gap-4">
+                        <div><h4 class="font-semibold">💰 Pemasaran Afiliasi</h4><p class="text-sm text-gray-600">Promosikan produk/layanan relevan (hosting, kursus) via link afiliasi.</p></div>
+                        <div><h4 class="font-semibold">📋 Survei Online Berbayar & Mikro Tugas</h4><p class="text-sm text-gray-600">Platform seperti Populix, YouGov untuk penghasilan tambahan cepat.</p></div>
+                        <div><h4 class="font-semibold">🧑‍🏫 Menjadi Mentor atau Tutor Online</h4><p class="text-sm text-gray-600">Ajar mata kuliah informatika, bahasa pemrograman di Ruangguru, Teachable.</p></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="platform" class="content-section">
+            <h2 class="text-2xl font-semibold mb-6 text-sky-700">Platform Freelance & Pemanfaatan Media Sosial</h2>
+            <p class="mb-6 text-gray-700">Memilih platform yang tepat dan strategi media sosial yang efektif adalah kunci. Bagian ini membahas pilihan platform freelance, perbandingan komisi, serta cara memanfaatkan media sosial untuk monetisasi.</p>
+            
+            <div class="grid lg:grid-cols-2 gap-8">
+                <div class="card p-6">
+                    <h3 class="text-xl font-semibold mb-3 text-sky-600">Memilih Platform Freelance</h3>
+                    <ul class="list-disc list-inside space-y-2 text-gray-700">
+                        <li><strong>Platform Lokal vs. Internasional:</strong> Pemula bisa mulai dari Sribulancer atau Projects.co.id. Upwork, Fiverr untuk pasar global.</li>
+                        <li><strong>Pentingnya Reputasi:</strong> Bangun profil lengkap dan testimoni positif.</li>
+                    </ul>
+                    <h4 class="font-semibold mt-4 mb-2 text-gray-700">Perbandingan Estimasi Komisi Platform Freelance:</h4>
+                    <div class="chart-container">
+                        <canvas id="commissionChart"></canvas>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-2 text-center">Catatan: Persentase komisi adalah estimasi dan dapat berubah. Beberapa platform memiliki struktur berjenjang atau biaya berbeda untuk klien.</p>
+                </div>
+
+                <div class="card p-6">
+                    <h3 class="text-xl font-semibold mb-3 text-teal-600">Memanfaatkan Media Sosial</h3>
+                     <p class="mb-4 text-gray-700">Media sosial adalah alat monetisasi yang kuat. Fokus pada konten menarik dan interaksi otentik.</p>
+                    <div class="space-y-3">
+                        <div>
+                            <h4 class="font-semibold text-teal-700">🎥 Konten Video</h4>
+                            <p class="text-sm text-gray-600">TikTok, Instagram Reels, YouTube Shorts sangat efektif. Tunjukkan produk/proyek, bagikan cuplikan kreatif.</p>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-teal-700">💬 Keterlibatan Real-Time</h4>
+                            <p class="text-sm text-gray-600">Tanggapi komentar & pesan dengan cepat untuk membangun kepercayaan.</p>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-teal-700">👥 Konten Buatan Pengguna (UGC)</h4>
+                            <p class="text-sm text-gray-600">Dorong pelanggan berbagi pengalaman. Berfungsi sebagai iklan gratis yang otentik.</p>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-teal-700">🛍️ Fitur Monetisasi Medsos</h4>
+                            <p class="text-sm text-gray-600">Gunakan Instagram Shopping, Facebook Marketplace, tautan afiliasi, dan cari sponsorship/endorsement.</p>
+                        </div>
+                         <div>
+                            <h4 class="font-semibold text-teal-700">🎯 Preferensi Generasi</h4>
+                            <p class="text-sm text-gray-600">Gen Z menemukan merek baru via TikTok (51%) dan Instagram (40%). Sesuaikan strategi Anda.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="tips" class="content-section">
+            <h2 class="text-2xl font-semibold mb-6 text-sky-700">Pertimbangan Utama untuk Mahasiswa</h2>
+             <p class="mb-6 text-gray-700">Mengejar pendapatan digital sambil kuliah membutuhkan perencanaan dan manajemen yang cermat. Berikut adalah beberapa tips penting untuk membantu Anda sukses.</p>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="card p-6">
+                    <h3 class="text-xl font-semibold mb-2 text-sky-600">⏱️ Manajemen Waktu & Prioritas</h3>
+                    <ul class="list-disc list-inside space-y-1 text-gray-700">
+                        <li>Tentukan waktu khusus untuk pekerjaan sampingan (misalnya, sebelum tidur, jam istirahat).</li>
+                        <li>Pastikan studi tidak terganggu.</li>
+                        <li>Disiplin diri tinggi penting untuk freelance & pembuatan produk digital.</li>
+                    </ul>
+                </div>
+                <div class="card p-6">
+                    <h3 class="text-xl font-semibold mb-2 text-teal-600">💼 Membangun Portofolio</h3>
+                    <ul class="list-disc list-inside space-y-1 text-gray-700">
+                        <li>Buat portofolio online yang kuat (situs pribadi, Behance, Dribbble).</li>
+                        <li>Tampilkan karya terbaik Anda sebagai bukti kemampuan.</li>
+                    </ul>
+                </div>
+                <div class="card p-6">
+                    <h3 class="text-xl font-semibold mb-2 text-indigo-600">🔗 Membangun Jaringan</h3>
+                     <ul class="list-disc list-inside space-y-1 text-gray-700">
+                        <li>Bergabung dengan komunitas pemrograman online/offline.</li>
+                        <li>Gunakan LinkedIn untuk jaringan profesional dan mencari peluang.</li>
+                        <li>Koneksi dapat membuka pintu untuk proyek dan kolaborasi.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="inspirasi" class="content-section">
+            <h2 class="text-2xl font-semibold mb-6 text-sky-700">Kisah Sukses & Inspirasi</h2>
+            <p class="mb-6 text-gray-700">Banyak lulusan informatika telah berhasil memonetisasi keterampilan mereka. Kisah mereka dapat menjadi motivasi dan bukti bahwa kesuksesan di era digital sangat mungkin diraih.</p>
+            <div class="space-y-6">
+                <div class="card p-6">
+                    <h3 class="text-xl font-semibold text-sky-600 mb-2">🌟 Pendiri Startup dari Lulusan Informatika</h3>
+                    <p class="text-gray-700">Kisah sukses seperti William Tanuwijaya (Tokopedia), Nadiem Makarim (Go-Jek), Ahmad Zaky (Bukalapak), dan lainnya menunjukkan potensi besar lulusan informatika. Perjalanan mereka sering dimulai dari pengembangan keterampilan teknis dan identifikasi kebutuhan pasar.</p>
+                </div>
+                <div class="card p-6">
+                    <h3 class="text-xl font-semibold text-teal-600 mb-2">💻 Mahasiswa Informatika dalam Proyek Digital Nyata</h3>
+                    <p class="text-gray-700">Contohnya, mahasiswa Informatika UPGRIS yang berkolaborasi dalam "Pengembangan Website CRM dengan Teknologi Next.js dan Laravel 11" saat magang. Ini menunjukkan kemampuan mahasiswa dalam merancang dan mengimplementasikan solusi teknologi secara profesional, sekaligus menambah portofolio berharga.</p>
+                    <p class="mt-3 text-sm text-gray-600 italic">Proyek seperti ini adalah langkah awal yang bagus untuk membangun rekam jejak dan pengalaman praktis.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="rekomendasi" class="content-section">
+            <h2 class="text-2xl font-semibold mb-6 text-sky-700">Kesimpulan & Rekomendasi Aksi</h2>
+            <p class="mb-6 text-gray-700">Lanskap digital menawarkan beragam peluang. Kunci sukses terletak pada kombinasi kompetensi teknis, soft skill, strategi terencana, dan adaptasi. Berikut adalah langkah-langkah yang direkomendasikan untuk Anda:</p>
+            <div class="card p-6">
+                <ol class="list-decimal list-inside space-y-3 text-gray-700 leading-relaxed">
+                    <li><strong>Fokus pada Spesialisasi Teknis yang Diminati Pasar:</strong> Kuasai 1-2 framework/bahasa tren (Next.js, Laravel, Python untuk data).</li>
+                    <li><strong>Kembangkan Kecakapan Bisnis dan Analitis:</strong> Pahami bagaimana skill teknis menyelesaikan masalah bisnis.</li>
+                    <li><strong>Prioritaskan Soft Skill Esensial:</strong> Adaptasi, komunikasi, kolaborasi adalah fondasi keberlanjutan karier.</li>
+                    <li><strong>Manfaatkan Platform Freelance Strategis:</strong> Mulai dari lokal, lalu internasional. Perhatikan komisi & bangun reputasi.</li>
+                    <li><strong>Eksplorasi Potensi Pendapatan Pasif:</strong> Buat e-book, kursus online, template, atau plugin.</li>
+                    <li><strong>Jadikan Media Sosial sebagai Alat Monetisasi:</strong> Bangun merek pribadi, promosikan layanan/produk.</li>
+                    <li><strong>Ambil Inspirasi, Namun Tetap Realistis:</strong> Fokus pada langkah kecil yang dapat dicapai (proyek freelance, produk digital sederhana).</li>
+                </ol>
+                <p class="mt-4 font-semibold text-sky-700">Dengan menerapkan rekomendasi ini, Anda dapat secara proaktif mengubah keterampilan kuliah menjadi sumber pendapatan yang berarti dan membangun fondasi karier yang kuat.</p>
+            </div>
+        </section>
+
+        <section id="generator" class="content-section">
+            <h2 class="text-2xl font-semibold mb-6 text-sky-700">✨ Generator Ide Monetisasi Digital</h2>
+            <p class="mb-6 text-gray-700">Gunakan fitur ini untuk mendapatkan ide-ide monetisasi yang dipersonalisasi. Jelaskan keahlian Anda, minat, atau area teknologi yang Anda kuasai, dan Gemini akan menyarankan beberapa ide potensial.</p>
+            <div class="card p-6">
+                <div class="mb-4">
+                    <label for="skillInput" class="block text-gray-700 text-sm font-bold mb-2">Jelaskan keahlian atau minat Anda (misal: "Saya ahli Python dan tertarik AI", "Saya suka desain UI/UX dan punya skill JavaScript"):</label>
+                    <textarea id="skillInput" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline h-32 resize-y" placeholder="Contoh: Saya menguasai pengembangan web dengan React dan Node.js, serta tertarik pada e-commerce."></textarea>
+                </div>
+                <button id="generateIdeasBtn" class="bg-sky-600 hover:bg-sky-700 text-white font-bold py-2 px-4 rounded-md focus:outline-none focus:shadow-outline flex items-center">
+                    ✨ Hasilkan Ide
+                    <span id="loadingSpinner" class="loading-spinner hidden"></span>
+                </button>
+                <div id="ideaOutput" class="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200 min-h-[100px] text-gray-700 whitespace-pre-wrap">
+                    Ide-ide yang dihasilkan akan muncul di sini...
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="text-center p-6 mt-8 border-t border-gray-300">
+        <p class="text-sm text-gray-600">&copy; <span id="currentYear"></span> Panduan Monetisasi Digital Mahasiswa IT. Dibuat berdasarkan laporan yang disediakan.</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const navLinks = document.querySelectorAll('.nav-link');
+            const contentSections = document.querySelectorAll('.content-section');
+            const accordions = document.querySelectorAll('.accordion-button');
+            const generateIdeasBtn = document.getElementById('generateIdeasBtn');
+            const skillInput = document.getElementById('skillInput');
+            const ideaOutput = document.getElementById('ideaOutput');
+            const loadingSpinner = document.getElementById('loadingSpinner');
+
+            document.getElementById('currentYear').textContent = new Date().getFullYear();
+
+            function setActiveSection(targetId) {
+                contentSections.forEach(section => {
+                    section.classList.remove('active');
+                    if (section.id === targetId) {
+                        section.classList.add('active');
+                    }
+                });
+
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.dataset.target === targetId) {
+                        link.classList.add('active');
+                    }
+                });
+                window.scrollTo(0, 0);
+            }
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', function () {
+                    setActiveSection(this.dataset.target);
+                });
+            });
+            
+            setActiveSection('beranda');
+
+            accordions.forEach(accordion => {
+                accordion.addEventListener('click', function() {
+                    this.classList.toggle('open');
+                    const details = this.nextElementSibling;
+                    if (details.classList.contains('details')) {
+                        details.classList.toggle('open');
+                    }
+                });
+            });
+            
+            const commissionData = {
+                labels: ['Sribulancer', 'Freelancer.com', 'Upwork (awal)', 'Fastwork', 'ServiceScape', 'Flexiple', 'Projects.co.id'],
+                datasets: [{
+                    label: 'Estimasi Komisi Platform (%)',
+                    data: [10, 15, 20, 17, 50, 0, 8], // Flexiple 0% for freelancer, Projects.co.id ~8%
+                    backgroundColor: [
+                        'rgba(59, 130, 246, 0.7)', // blue-500
+                        'rgba(16, 185, 129, 0.7)', // emerald-500
+                        'rgba(239, 68, 68, 0.7)',  // red-500
+                        'rgba(249, 115, 22, 0.7)', // orange-500
+                        'rgba(139, 92, 246, 0.7)', // violet-500
+                        'rgba(217, 70, 239, 0.7)', // fuchsia-500
+                        'rgba(20, 184, 166, 0.7)' // teal-500
+                    ],
+                    borderColor: [
+                        'rgba(59, 130, 246, 1)',
+                        'rgba(16, 185, 129, 1)',
+                        'rgba(239, 68, 68, 1)',
+                        'rgba(239, 68, 68, 1)',
+                        'rgba(139, 92, 246, 1)',
+                        'rgba(217, 70, 239, 1)',
+                        'rgba(20, 184, 166, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            };
+
+            const commissionChartCtx = document.getElementById('commissionChart');
+            if (commissionChartCtx) {
+                 new Chart(commissionChartCtx, {
+                    type: 'bar',
+                    data: commissionData,
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Persentase Komisi (%)'
+                                }
+                            },
+                            x: {
+                                ticks: {
+                                    autoSkip: false,
+                                    maxRotation: 45,
+                                    minRotation: 30,
+                                     callback: function(value, index, values) {
+                                        const label = this.getLabelForValue(value);
+                                        if (label.length > 15) {
+                                            return label.substring(0, 15) + '...';
+                                        }
+                                        return label;
+                                    }
+                                }
+                            }
+                        },
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.dataset.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        if (context.parsed.y !== null) {
+                                            label += context.parsed.y + '%';
+                                        }
+                                        if (context.label === "Flexiple") {
+                                            label += " (untuk freelancer, klien mungkin dikenakan biaya)";
+                                        }
+                                        return label;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            generateIdeasBtn.addEventListener('click', async () => {
+                const userSkills = skillInput.value.trim();
+                if (!userSkills) {
+                    ideaOutput.textContent = "Mohon masukkan keahlian atau minat Anda untuk menghasilkan ide.";
+                    return;
+                }
+
+                ideaOutput.textContent = "";
+                loadingSpinner.classList.remove('hidden');
+                generateIdeasBtn.disabled = true;
+
+                try {
+                    let chatHistory = [];
+                    const prompt = `Sebagai seorang ahli strategi digital yang membantu mahasiswa informatika, berikan 5 ide inovatif untuk monetisasi keahlian digital di internet dan media sosial. Pertimbangkan bahwa mahasiswa ini memiliki keahlian/minat dalam: "${userSkills}". Untuk setiap ide, sertakan juga saran platform yang relevan dan cara memulai secara singkat. Format output dalam daftar bernomor yang mudah dibaca.`;
+                    
+                    chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+                    const payload = { contents: chatHistory };
+                    const apiKey = "";
+                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    const result = await response.json();
+                    if (result.candidates && result.candidates.length > 0 &&
+                        result.candidates[0].content && result.candidates[0].content.parts &&
+                        result.candidates[0].content.parts.length > 0) {
+                        const text = result.candidates[0].content.parts[0].text;
+                        ideaOutput.textContent = text;
+                    } else {
+                        ideaOutput.textContent = "Maaf, tidak dapat menghasilkan ide. Coba lagi.";
+                    }
+                } catch (error) {
+                    console.error("Error calling Gemini API:", error);
+                    ideaOutput.textContent = "Terjadi kesalahan saat menghubungi layanan. Mohon coba lagi nanti.";
+                } finally {
+                    loadingSpinner.classList.add('hidden');
+                    generateIdeasBtn.disabled = false;
+                }
+            });
+        });
+    </script>
+</body>
+</html>
